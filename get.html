@@ -5,31 +5,69 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>InstaShield'i İndir</title>
 <style>
+  * { box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; text-align: center; color: #1a1a1a; background: #fff; }
-  p { color: #666; margin: 0 0 20px; }
+  p { color: #666; margin: 0 0 20px; max-width: 320px; }
   a.btn { display: inline-block; background: #1E3866; color: #fff; text-decoration: none; font-weight: 600; padding: 14px 28px; border-radius: 12px; }
-  a.secondary { display: inline-block; margin-top: 16px; color: #666; text-decoration: underline; font-size: 14px; }
+
+  /* Shown only when we detect Instagram's in-app browser — see script
+     below. The arrow points at its own top-right corner menu (⋯), which is
+     the only thing on this whole page that actually opens the App Store:
+     no link/button here can trigger that menu itself, only guide a real
+     tap on it. */
+  #guide { display: none; }
+  #guide .arrow {
+    position: fixed; top: 14px; right: 56px;
+    font-size: 40px; color: #1E3866;
+    transform: rotate(35deg);
+    animation: point 1.1s ease-in-out infinite;
+  }
+  @keyframes point {
+    0%, 100% { transform: rotate(35deg) translate(0, 0); }
+    50% { transform: rotate(35deg) translate(6px, -6px); }
+  }
+  #guide .card {
+    margin-top: 64px;
+    background: #F4F1EA;
+    border-radius: 16px;
+    padding: 18px 20px;
+    max-width: 320px;
+  }
+  #guide .card b { color: #1E3866; }
 </style>
 </head>
 <body>
-<p>App Store'a yönlendiriliyorsun…</p>
-<!--
-  Confirmed live (screenshot from inside Instagram's in-app browser): the
-  page itself loads fine, but itms-apps:// and a plain https link both stay
-  trapped inside Instagram's WebView on tap — Instagram intercepts the tap
-  before iOS ever gets to decide whether a native app/Safari should handle
-  it, so no scheme that still navigates *within this WebView* can escape it.
-  x-safari-https:// is different: it's an explicit OS-level instruction
-  ("launch Safari specifically for this URL"), not a page navigation, which
-  is why in-app browsers that swallow itms-apps/https still tend to honor
-  it. Safari itself doesn't understand this prefix, so the visible fallback
-  link keeps the plain https version for when the page is opened somewhere
-  that isn't a wrapping in-app browser at all.
--->
-<a class="btn" id="link" href="x-safari-https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463">App Store'da Aç</a>
-<a class="secondary" href="https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463">Açılmadıysa buraya dokun</a>
+
+<div id="plain">
+  <p>App Store'a yönlendiriliyorsun…</p>
+  <a class="btn" id="link" href="https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463">App Store'da Aç</a>
+</div>
+
+<div id="guide">
+  <div class="arrow">↗</div>
+  <div class="card">
+    <p style="margin:0 0 8px;"><b>Instagram'ın kendi tarayıcısındasın</b> — App Store'a gitmek için:</p>
+    <p style="margin:0;">Sağ üstteki <b>⋯</b> simgesine dokun, açılan menüden <b>"Tarayıcıda Aç"</b>ı seç.</p>
+  </div>
+</div>
+
 <script>
-  window.location.href = "x-safari-https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463";
+  // Instagram's (and Facebook's) in-app browser identifies itself in the
+  // user agent. It intercepts every navigation attempt — plain https,
+  // itms-apps://, x-safari-https://, all of it — before iOS ever gets a
+  // chance to hand off to Safari or a native app (confirmed live, four
+  // different schemes tried, all silently swallowed). No link on this page
+  // can trigger it; only a real tap on Instagram's own "···" menu can. So
+  // instead of pretending a button will work, detect the in-app browser
+  // and point at the one thing that actually does.
+  var ua = navigator.userAgent || "";
+  var inApp = /Instagram|FBAN|FBAV/i.test(ua);
+  if (inApp) {
+    document.getElementById("plain").style.display = "none";
+    document.getElementById("guide").style.display = "block";
+  } else {
+    window.location.href = "https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463";
+  }
 </script>
 </body>
 </html>
