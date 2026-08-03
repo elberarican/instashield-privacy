@@ -14,23 +14,22 @@
 <body>
 <p>App Store'a yönlendiriliyorsun…</p>
 <!--
-  Instagram's in-app browser doesn't reliably follow a plain https App Store
-  link (neither an automatic JS redirect nor a real tap on it) — reported
-  live: the page loads fine, but neither the auto-redirect nor the manual
-  "tap here" button actually opened the App Store. itms-apps:// is Apple's
-  own URL scheme for opening the App Store app directly instead of loading
-  a web page for it, which restrictive in-app browsers hand off to the OS
-  more reliably than a Universal Link over https. Kept the https link as a
-  visible secondary fallback in case a given browser doesn't recognize the
-  itms-apps scheme at all.
+  Confirmed live (screenshot from inside Instagram's in-app browser): the
+  page itself loads fine, but itms-apps:// and a plain https link both stay
+  trapped inside Instagram's WebView on tap — Instagram intercepts the tap
+  before iOS ever gets to decide whether a native app/Safari should handle
+  it, so no scheme that still navigates *within this WebView* can escape it.
+  x-safari-https:// is different: it's an explicit OS-level instruction
+  ("launch Safari specifically for this URL"), not a page navigation, which
+  is why in-app browsers that swallow itms-apps/https still tend to honor
+  it. Safari itself doesn't understand this prefix, so the visible fallback
+  link keeps the plain https version for when the page is opened somewhere
+  that isn't a wrapping in-app browser at all.
 -->
-<a class="btn" id="link" href="itms-apps://apps.apple.com/app/id6791182463" target="_blank" rel="noopener noreferrer">App Store'da Aç</a>
-<a class="secondary" href="https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463" target="_blank" rel="noopener noreferrer">Açılmadıysa buraya dokun</a>
+<a class="btn" id="link" href="x-safari-https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463">App Store'da Aç</a>
+<a class="secondary" href="https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463">Açılmadıysa buraya dokun</a>
 <script>
-  window.location.href = "itms-apps://apps.apple.com/app/id6791182463";
-  setTimeout(function () {
-    window.location.href = "https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463";
-  }, 1500);
+  window.location.href = "x-safari-https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463";
 </script>
 </body>
 </html>
