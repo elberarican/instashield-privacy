@@ -9,12 +9,13 @@
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; text-align: center; color: #1a1a1a; background: #fff; }
   p { color: #666; margin: 0 0 20px; max-width: 320px; }
   a.btn { display: inline-block; background: #1E3866; color: #fff; text-decoration: none; font-weight: 600; padding: 14px 28px; border-radius: 12px; }
+  .btn-row { display: flex; flex-direction: column; gap: 10px; align-items: center; }
 
   /* Shown only when we detect Instagram's in-app browser — see script
      below. The arrow points at its own top-right corner menu (⋯), which is
-     the only thing on this whole page that actually opens the App Store:
-     no link/button here can trigger that menu itself, only guide a real
-     tap on it. */
+     the only thing on this whole page that actually opens the App
+     Store/Play Store: no link/button here can trigger that menu itself,
+     only guide a real tap on it. */
   #guide { display: none; }
   #guide .arrow {
     position: fixed; top: 14px; right: 56px;
@@ -41,14 +42,17 @@
 <img src="logo.png" alt="InstaShield" width="88" height="88" style="border-radius: 20px; margin-bottom: 20px; box-shadow: 0 8px 24px -8px rgba(30,56,102,0.5);" />
 
 <div id="plain">
-  <p>App Store'a yönlendiriliyorsun…</p>
-  <a class="btn" id="link" href="https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463">App Store'da Aç</a>
+  <p id="plainText">Mağazaya yönlendiriliyorsun…</p>
+  <div class="btn-row" id="btnRow">
+    <a class="btn" id="iosLink" href="https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463">App Store'da Aç</a>
+    <a class="btn" id="androidLink" href="https://play.google.com/store/apps/details?id=com.elberarican.instashield">Google Play'de Aç</a>
+  </div>
 </div>
 
 <div id="guide">
   <div class="arrow">↗</div>
   <div class="card">
-    <p style="margin:0 0 8px;"><b>Instagram'ın kendi tarayıcısındasın</b> — App Store'a gitmek için:</p>
+    <p style="margin:0 0 8px;"><b>Instagram'ın kendi tarayıcısındasın</b> — mağazaya gitmek için:</p>
     <p style="margin:0;">Sağ üstteki <b>⋯</b> simgesine dokun, açılan menüden <b>"Tarayıcıda Aç"</b>ı seç.</p>
   </div>
 </div>
@@ -56,19 +60,32 @@
 <script>
   // Instagram's (and Facebook's) in-app browser identifies itself in the
   // user agent. It intercepts every navigation attempt — plain https,
-  // itms-apps://, x-safari-https://, all of it — before iOS ever gets a
-  // chance to hand off to Safari or a native app (confirmed live, four
-  // different schemes tried, all silently swallowed). No link on this page
-  // can trigger it; only a real tap on Instagram's own "···" menu can. So
-  // instead of pretending a button will work, detect the in-app browser
-  // and point at the one thing that actually does.
+  // itms-apps://, x-safari-https://, all of it — before the OS ever gets a
+  // chance to hand off to a real browser or native app (confirmed live on
+  // iOS, four different schemes tried, all silently swallowed). No link on
+  // this page can trigger it; only a real tap on Instagram's own "···" menu
+  // can. So instead of pretending a button will work, detect the in-app
+  // browser and point at the one thing that actually does — the store it
+  // then lands on is decided by the platform check below once the visitor
+  // is in a real browser.
   var ua = navigator.userAgent || "";
   var inApp = /Instagram|FBAN|FBAV/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+  var isAndroid = /Android/i.test(ua);
+  var IOS_URL = document.getElementById("iosLink").href;
+  var ANDROID_URL = document.getElementById("androidLink").href;
+
   if (inApp) {
     document.getElementById("plain").style.display = "none";
     document.getElementById("guide").style.display = "block";
+  } else if (isIOS) {
+    window.location.href = IOS_URL;
+  } else if (isAndroid) {
+    window.location.href = ANDROID_URL;
   } else {
-    window.location.href = "https://apps.apple.com/tr/app/instashield-unfollower-tracker/id6791182463";
+    // Desktop or an unrecognized platform — no single right store to send
+    // someone to, so let them pick instead of guessing.
+    document.getElementById("plainText").textContent = "InstaShield'i indir:";
   }
 </script>
 </body>
